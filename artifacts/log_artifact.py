@@ -7,7 +7,7 @@ def main():
     # Force to use wandb prod endpoint
     wandb.login(host="https://api.wandb.ai")
     # Entity is team name, NOT org name
-    with wandb.init(entity="pinglei-byob-3", project="log-txt", name="txt") as run:
+    with wandb.init(entity="pinglei-byob-1", project="log-txt", name="txt") as run:
         artifact = wandb.Artifact(name="txt", type="dataset")
         artifact.add_file(local_path="./a.txt")
         artifact.save()
