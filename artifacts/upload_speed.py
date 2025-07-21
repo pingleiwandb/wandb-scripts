@@ -32,7 +32,7 @@ def create_random_file(filename, size_gb):
     print(f"Successfully created {filename} ({size_gb}GB)")
     return os.path.abspath(filename)
 
-def upload_file(size_gb, entity, project):
+def upload_file(size_gb, entity, project, skip_cache=True, policy="immutable"):
     wandb.login()
 
     # Create file if not exists
@@ -51,7 +51,7 @@ def upload_file(size_gb, entity, project):
         artifact = wandb.Artifact(name=filename, type="dataset")
         # Immtuable disable copying to a temp file before upload
         # Skip cache disable copying to cache dir after upload is done
-        artifact.add_file(filename, skip_cache=True, policy="immutable")
+        artifact.add_file(filename, skip_cache=skip_cache, policy=policy)
         artifact.save()
         # Wait until upload is done because save() is async
         artifact.wait()
@@ -72,15 +72,19 @@ def upload_file(size_gb, entity, project):
 #
 # Example command:
 # python3 upload_speed.py --size 10 --entity reg-team-2 --project pinglei-wbench-gcs-upload-v20250721-v2
+# python3 upload_speed.py --size 20 --entity reg-team-2 --project pinglei-wbench-gcs-upload-v20250721-v2 --policy mutable
 def main():
     parser = argparse.ArgumentParser(description='Create and upload files to wandb with speed measurement')
     parser.add_argument('--size', type=int, required=True, help='File size in GB')
     parser.add_argument('--entity', type=str, required=True, help='Wandb entity name')
     parser.add_argument('--project', type=str, required=True, help='Wandb project name')
+    parser.add_argument('--skip-cache', type=bool, default=True, help='Skip cache during upload (default: True)')
+    parser.add_argument('--policy', type=str, default='immutable', choices=['immutable', 'mutable'],
+                       help='Artifact policy: immutable or mutable (default: immutable)')
     
     args = parser.parse_args()
     
-    upload_file(args.size, args.entity, args.project)
+    upload_file(args.size, args.entity, args.project, args.skip_cache, args.policy)
 
 if __name__ == "__main__":
     main()
